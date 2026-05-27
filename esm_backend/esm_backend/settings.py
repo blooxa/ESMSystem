@@ -1,14 +1,18 @@
 # esm_backend/settings.py
 from pathlib import Path
+import dj_database_url
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-@qpx@0b5mrhe*79b)$da0!gt@t)w5^$w&y5$+a#%tjnb!oca0e'
+# Берем SECRET_KEY из переменных окружения Render
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-@qpx@0b5mrhe*79b)$da0!gt@t)w5^$w&y5$+a#%tjnb!oca0e')
 
-DEBUG = True
+# DEBUG должен быть False в продакшене
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+# Разрешаем все хосты на Render (временно)
+ALLOWED_HOSTS = ['*']  # Потом замените на '.onrender.com', 'localhost', '127.0.0.1'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -27,6 +31,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Добавьте для статики
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -56,35 +61,57 @@ TEMPLATES = [
 WSGI_APPLICATION = 'esm_backend.wsgi.application'
 ASGI_APPLICATION = 'esm_backend.asgi.application'
 
-# PostgreSQL подключение
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ESMsystem',
-        'USER': 'postgres',
-        'PASSWORD': 'Pizda228',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        'OPTIONS': {
-            'options': '-c timezone=Europe/Moscow',
-        },
-    }
-}
+# ------ КЛЮЧЕВОЙ МОМЕНТ: Настройка БД для Render ------
+# Render автоматически добавит переменную DATABASE_URL
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
-# Временная настройка Channels (без Redis для начала)
+if DATABASE_URL:
+    # Если мы на Render (есть DATABASE_URL), используем PostgreSQL
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    # Локальная разработка
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'ESMsystem',
+            'USER': 'postgres',
+            'PASSWORD': 'Pizda228',
+            'HOST': 'localhost',
+            'PORT': '5432',
+            'OPTIONS': {
+                'options': '-c timezone=Europe/Moscow',
+            },
+        }
+    }
+
+# Channels (для WebSocket, если нужно)
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer'
     }
 }
+
+# CORS настройки - добавьте URL вашего будущего React
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
     "http://localhost:5000",
     "http://localhost:8080",
+    "http://127.0.0.1:3000",
     "http://127.0.0.1:5000",
     "http://127.0.0.1:8080",
-    "http://localhost:3000",  # React фронтенд
-    "http://127.0.0.1:3000",   # React фронтенд
+    # Добавьте URL из Render после деплоя
+    # "https://your-frontend.onrender.com",
 ]
+
+# Или разрешите все для теста (но лучше не надо в продакшене)
+CORS_ALLOW_ALL_ORIGINS = True  # Только для теста!
+
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -105,6 +132,7 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
 CORS_ALLOW_CREDENTIALS = True
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -127,7 +155,11 @@ TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 USE_TZ = True
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
+
+# Статические файлы (важно для админки Django)
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -142,14 +174,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20
 }
+
 AUTHENTICATION_BACKENDS = [
     'esmsystem.auth_backend.CustomAuthBackend',
-    'django.contrib.auth.backends.ModelBackend',  # Стандартный бэкенд
+    'django.contrib.auth.backends.ModelBackend',
 ]
-# Настройка для работы с существующей базой данных
-# Не создавать автоматически таблицы auth_user и т.д.
-# MIGRATION_MODULES = {
-#     'auth': None,
-#     'contenttypes': None,
-#     'sessions': None,
-# }

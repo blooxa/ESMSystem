@@ -1,8 +1,6 @@
-# esm_backend/urls.py
 from django.contrib import admin
-from django.urls import path, include, re_path  # добавлен re_path
+from django.urls import path, include
 from django.http import HttpResponse
-from django.views.generic import TemplateView  # добавлен TemplateView
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
 from esmsystem.views import (
@@ -54,7 +52,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('api/simple-auth/', simple_auth, name='simple_auth'),
 
-    path('api/reports/all_requests/', ReportsViewSet.as_view({'get': 'all_requests'}), name='reports-all_requests'),
+path('api/reports/all_requests/', ReportsViewSet.as_view({'get': 'all_requests'}), name='reports-all_requests'),
     path('api/reports/requests_by_status/<str:status>/', ReportsViewSet.as_view({'get': 'requests_by_status'}), name='reports-requests_by_status'),
     path('api/reports/requests_by_users/', ReportsViewSet.as_view({'get': 'requests_by_users'}), name='reports-requests_by_users'),
     path('api/reports/pending_safety_requests/', ReportsViewSet.as_view({'get': 'pending_safety_requests'}), name='reports-pending_safety_requests'),
@@ -72,17 +70,18 @@ urlpatterns = [
     path('api/reports/shops_report/', ReportsViewSet.as_view({'get': 'shops_report'}), name='reports-shops_report'),
     path('api/reports/positions_report/', ReportsViewSet.as_view({'get': 'positions_report'}), name='reports-positions_report'),
     path('api/reports/sizes_report/', ReportsViewSet.as_view({'get': 'sizes_report'}), name='reports-sizes_report'),
+
 ]
-
-# ⚠️ ВАЖНО: этот блок должен быть в КОНЦЕ файла
-# Все остальные маршруты отдаем React (должен быть последним)
-# Для продакшена (DEBUG=False) раскомментировать:
-# if not DEBUG:
-#     urlpatterns += [
-#         re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
-#     ]
-
-# Для разработки (можно раскомментировать для теста):
-# urlpatterns += [
-#     re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
-# ]
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Стандартный бэкенд
+    'esmsystem.auth_backend.CustomAuthBackend',  # Ваш кастомный бэкенд
+]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
