@@ -1,6 +1,7 @@
 meta:
   environment: python
   version: "3.9"
+  toolchain: pip
 build:
   - pip install --no-cache-dir channels daphne
   - pip install --no-cache-dir -r requirements.txt
