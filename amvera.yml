@@ -1,14 +1,9 @@
----
 meta:
   environment: python
-  toolchain:
-    name: pip
-    version: 3.9
+  version: "3.9"
 build:
-  requirementsPath: requirements.txt
-  useCache: true
+  - pip install --no-cache-dir channels daphne
+  - pip install --no-cache-dir -r requirements.txt
 run:
-  persistenceMount: /data
-  command: cd esm_backend && gunicorn esm_backend.wsgi:application --bind 0.0.0.0:8000
-  containerPort: 8000
-  servicePort: 80
+  command: cd esm_backend && daphne -b 0.0.0.0 -p 8000 esm_backend.asgi:application
+  port: 8000
