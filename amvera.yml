@@ -9,6 +9,6 @@ build:
   useCache: true
 run:
   persistenceMount: /data
-  command: cd esm_backend && python manage.py runserver
+  command: cd esm_backend && gunicorn esm_backend.wsgi:application --bind 0.0.0.0:8000
   containerPort: 8000
   servicePort: 80
