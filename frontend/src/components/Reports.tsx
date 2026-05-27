@@ -1,0 +1,365 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Paper,
+  Alert,
+  CircularProgress,
+  Divider,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+} from '@mui/material';
+import {
+  Download as DownloadIcon,
+  Assessment as ReportIcon,
+  ShoppingCart as OrderIcon,
+  People as PeopleIcon,
+  Inventory as InventoryIcon,
+  CheckCircle as SuccessIcon,
+  Schedule as ScheduleIcon,
+  Security as SafetyIcon,
+  AdminPanelSettings as AdminIcon,
+  Person as PersonIcon,
+  Assignment as AssignmentIcon,
+  TableChart as ExcelIcon,
+} from '@mui/icons-material';
+import { reportsApi } from '../services/api';
+import api from '../services/api';
+import Layout from './Layout';
+
+const Reports: React.FC = () => {
+  const [userRole, setUserRole] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+  const [selectedEmployee, setSelectedEmployee] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [positions, setPositions] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchUserRole();
+    fetchEmployees();
+    fetchPositions();
+    fetchUsers();
+  }, []);
+
+  const fetchUserRole = async () => {
+  try {
+    const response = await api.get('/api/users/me/');
+    console.log('User data:', response.data);
+    const role = response.data.role;
+    const username = response.data.username;
+
+    // Определяем роль (учитываем русские и английские названия)
+    if (username === 'admin' || role === 'admin' || role === 'администратор' || response.data.is_superuser) {
+      setUserRole('admin');
+    } else if (role === 'economic_head' || role === 'начальник хоз. отдела') {
+      setUserRole('economic_head');
+    } else if (role === 'safety_officer' || role === 'охрана труда') {
+      setUserRole('safety_officer');
+    } else if (role === 'department_head' || role === 'начальник цеха') {
+      setUserRole('department_head');
+    } else {
+      setUserRole('user');
+    }
+
+    console.log('Set user role:', userRole);
+  } catch (error) {
+    console.error('Error fetching user role:', error);
+    setUserRole('user');
+  }
+};
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await api.get('/api/admin/employees/get_all_employees/');
+      setEmployees(response.data);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    }
+  };
+
+  const fetchPositions = async () => {
+    try {
+      const response = await api.get('/api/admin/positions/get_all_positions/');
+      setPositions(response.data);
+    } catch (error) {
+      console.error('Error fetching positions:', error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await api.get('/api/admin/users/get_all_users/');
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  const downloadReport = async (endpoint: string, filename: string, needsEmployee?: boolean) => {
+  if (needsEmployee && !selectedEmployee) {
+    setError('Сначала выберите сотрудника в фильтрах');
+    return;
+  }
+
+  if (!endpoint) {
+    setError('Не выбран сотрудник для отчета');
+    return;
+  }
+
+  setLoading(true);
+  setError('');
+  setSuccess('');
+
+  try {
+    const response = await api.get(endpoint, { responseType: 'blob' });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+    setSuccess(`Отчет "${filename}" успешно сформирован`);
+  } catch (err) {
+    console.error('Error downloading report:', err);
+    setError('Ошибка при формировании отчета');
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // Функции для разных типов отчетов
+  const reportsByRole = {
+    admin: [
+      {
+  category: 'Заявки',
+  reports: [
+    { title: 'Все заявки', endpoint: '/api/reports/all_requests/', filename: 'all_requests' },
+    { title: 'Заявки по статусам', endpoint: `/api/reports/requests_by_status/${selectedStatus}/`, filename: `requests_by_status_${selectedStatus}` },
+    { title: 'Заявки по пользователям', endpoint: '/api/reports/requests_by_users/', filename: 'requests_by_users' },
+    { title: 'На рассмотрении (Охрана труда)', endpoint: '/api/reports/pending_safety_requests/', filename: 'pending_safety_requests' },
+    { title: 'На рассмотрении (Хоз. отдел)', endpoint: '/api/reports/pending_economic_requests/', filename: 'pending_economic_requests' },
+  ],
+},
+      {
+        category: 'Сотрудники',
+        reports: [
+          { title: 'Все сотрудники с размерами', endpoint: '/api/reports/employees_with_sizes/', filename: 'employees_with_sizes' },
+          { title: 'Нормы выдачи СИЗ по сотруднику', endpoint: `/api/reports/employee_ppe_standards/${selectedEmployee}/`, filename: `employee_ppe_standards` },
+          { title: 'Нормы выдачи СИЗ по должности', endpoint: '/api/reports/position_ppe_standards/', filename: 'position_ppe_standards' },
+        ],
+      },
+      {
+        category: 'Выдача СИЗ',
+        reports: [
+          { title: 'Все выдачи СИЗ', endpoint: '/api/reports/all_ppe_issues/', filename: 'all_ppe_issues' },
+          { title: 'Выдачи СИЗ по сотруднику', endpoint: `/api/reports/employee_ppe_issues/${selectedEmployee}/`, filename: `employee_ppe_issues` },
+          { title: 'Массовая выдача (по нормам)', endpoint: '/api/reports/mass_issue_report/', filename: 'mass_issue_report' },
+        ],
+      },
+      {
+        category: 'Администрирование',
+        reports: [
+          { title: 'Пользователи системы', endpoint: '/api/reports/users_report/', filename: 'users_report' },
+          { title: 'Цеха', endpoint: '/api/reports/shops_report/', filename: 'shops_report' },
+          { title: 'Должности', endpoint: '/api/reports/positions_report/', filename: 'positions_report' },
+          { title: 'ГОСТ размеры', endpoint: '/api/reports/sizes_report/', filename: 'sizes_report' },
+        ],
+      },
+    ],
+    economic_head: [
+      {
+        category: 'Заявки',
+        reports: [
+          { title: 'Все заявки', endpoint: '/api/reports/all_requests/', filename: 'all_requests' },
+          { title: 'Заявки по статусам', endpoint: `/api/reports/requests_by_status/${selectedStatus}/`, filename: `requests_by_status_${selectedStatus}` },
+          { title: 'Заявки по пользователям', endpoint: '/api/reports/requests_by_users/', filename: 'requests_by_users' },
+          { title: 'На рассмотрении (Хоз. отдел)', endpoint: '/api/reports/pending_economic_requests/', filename: 'pending_economic_requests' },
+        ],
+      },
+      {
+        category: 'Сотрудники',
+        reports: [
+          { title: 'Сотрудники с размерами', endpoint: '/api/reports/my_shop_employees_with_sizes/', filename: 'my_shop_employees_with_sizes' },
+        ],
+      },
+      {
+        category: 'Выдача СИЗ',
+        reports: [
+          { title: 'Все выдачи СИЗ', endpoint: '/api/reports/all_ppe_issues/', filename: 'all_ppe_issues' },
+          { title: 'Выдачи СИЗ по сотруднику', endpoint: `/api/reports/employee_ppe_issues/${selectedEmployee}/`, filename: `employee_ppe_issues` },
+          { title: 'Массовая выдача (по нормам)', endpoint: '/api/reports/mass_issue_report/', filename: 'mass_issue_report' },
+        ],
+      },
+    ],
+    safety_officer: [
+      {
+        category: 'Заявки',
+        reports: [
+          { title: 'Все заявки', endpoint: '/api/reports/all_requests/', filename: 'all_requests' },
+          { title: 'Заявки по статусам', endpoint: `/api/reports/requests_by_status/${selectedStatus}/`, filename: `requests_by_status_${selectedStatus}` },
+          { title: 'Заявки по пользователям', endpoint: '/api/reports/requests_by_users/', filename: 'requests_by_users' },
+          { title: 'На рассмотрении (Охрана труда)', endpoint: '/api/reports/pending_safety_requests/', filename: 'pending_safety_requests' },
+        ],
+      },
+      {
+        category: 'Нормы выдачи',
+        reports: [
+          { title: 'Нормы выдачи СИЗ по сотруднику', endpoint: `/api/reports/employee_ppe_standards/${selectedEmployee}/`, filename: `employee_ppe_standards` },
+          { title: 'Нормы выдачи СИЗ по должности', endpoint: '/api/reports/position_ppe_standards/', filename: 'position_ppe_standards' },
+        ],
+      },
+    ],
+    department_head: [
+      {
+        category: 'Мои заявки',
+        reports: [
+          { title: 'Мои заявки', endpoint: '/api/reports/my_requests/', filename: 'my_requests' },
+          { title: 'Мои заявки по статусам', endpoint: `/api/reports/my_requests_by_status/${selectedStatus}/`, filename: `my_requests_by_status_${selectedStatus}` },
+        ],
+      },
+      {
+        category: 'Сотрудники',
+        reports: [
+          { title: 'Сотрудники цеха с размерами', endpoint: '/api/reports/my_shop_employees_with_sizes/', filename: 'my_shop_employees_with_sizes' },
+          { title: 'Нормы выдачи СИЗ для сотрудников', endpoint: '/api/reports/my_shop_employee_standards/', filename: 'my_shop_employee_standards' },
+        ],
+      },
+    ],
+    user: [
+      {
+        category: 'Мои заявки',
+        reports: [
+          { title: 'Мои заявки', endpoint: '/api/reports/my_requests/', filename: 'my_requests' },
+          { title: 'Мои заявки по статусам', endpoint: `/api/reports/my_requests_by_status/${selectedStatus}/`, filename: `my_requests_by_status_${selectedStatus}` },
+        ],
+      },
+    ],
+  };
+
+  const getReportsForRole = () => {
+    if (userRole === 'admin') return reportsByRole.admin;
+    if (userRole === 'economic_head') return reportsByRole.economic_head;
+    if (userRole === 'safety_officer') return reportsByRole.safety_officer;
+    if (userRole === 'department_head') return reportsByRole.department_head;
+    return reportsByRole.user;
+  };
+
+  const statusOptions = [
+    { value: 'all', label: 'Все' },
+    { value: 'pending', label: 'На рассмотрении (Охрана труда)' },
+    { value: 'hr_approved', label: 'Одобрено охраной труда' },
+    { value: 'approved', label: 'Одобрено хоз. отделом' },
+    { value: 'rejected', label: 'Отклонена' },
+    { value: 'ordered', label: 'Заказ сделан' },
+    { value: 'completed', label: 'Выполнена' },
+  ];
+
+  const getRoleLabel = () => {
+  switch (userRole) {
+    case 'admin':
+      return { label: 'Администратор', icon: <AdminIcon />, color: '#f44336' };
+    case 'economic_head':
+      return { label: 'Начальник хоз. отдела', icon: <OrderIcon />, color: '#9c27b0' };
+    case 'safety_officer':
+      return { label: 'Охрана труда', icon: <SafetyIcon />, color: '#2196f3' };
+    case 'department_head':
+      return { label: 'Начальник цеха', icon: <PeopleIcon />, color: '#ff9800' };
+    default:
+      return { label: 'Пользователь', icon: <PersonIcon />, color: '#4caf50' };
+  }
+};
+
+  const roleInfo = getRoleLabel();
+
+  const renderReportButtons = (reports: any[]) => {
+    return (
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+        {reports.map((report, idx) => (
+          <Box key={idx} sx={{ flex: '1 1 300px', minWidth: 280 }}>
+            <Card sx={{ borderRadius: 2, height: '100%', '&:hover': { boxShadow: 3 } }}>
+              <CardContent>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                  {report.title}
+                </Typography>
+                <Button
+                  variant="contained"
+                  startIcon={loading ? <CircularProgress size={20} /> : <DownloadIcon />}
+                  onClick={() => downloadReport(report.endpoint, report.filename)}
+                  disabled={loading}
+                  fullWidth
+                  sx={{ mt: 1, bgcolor: '#1976d2' }}
+                >
+                  Скачать отчет
+                </Button>
+              </CardContent>
+            </Card>
+          </Box>
+        ))}
+      </Box>
+    );
+  };
+
+  return (
+    <Layout>
+      <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700 }}>
+              Отчеты
+            </Typography>
+          </Box>
+          <Chip
+            icon={roleInfo.icon}
+            label={roleInfo.label}
+            sx={{ bgcolor: `${roleInfo.color}15`, color: roleInfo.color, fontWeight: 500 }}
+          />
+        </Box>
+
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess('')}>
+            {success}
+          </Alert>
+        )}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+            {error}
+          </Alert>
+        )}
+
+
+        {/* Список доступных отчетов */}
+        {getReportsForRole().map((category, idx) => (
+          <Card key={idx} sx={{ borderRadius: 3, mb: 3 }}>
+            <CardContent>
+              <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <ReportIcon color="primary" />
+                {category.category}
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
+              {renderReportButtons(category.reports)}
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
+    </Layout>
+  );
+};
+
+export default Reports;

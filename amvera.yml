@@ -1,0 +1,9 @@
+meta:
+  environment: python
+  version: "3.9"
+  build:
+    - pip install -r requirements.txt
+  run:
+    command: cd esm_backend && python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 8000
