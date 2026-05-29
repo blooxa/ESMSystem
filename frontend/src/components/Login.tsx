@@ -38,7 +38,7 @@ const Login: React.FC = () => {
     setError('');
 
     try {
-      const response = await api.post('/api/simple-auth/', {
+      const response = await api.post('/simple-auth/', {
         username: username.trim(),
         password,
       });
