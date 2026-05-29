@@ -82,12 +82,30 @@ const MyRequests: React.FC = () => {
   const [detailsLoading, setDetailsLoading] = useState(false);
 
   useEffect(() => {
-    fetchRequests();
-  }, []);
+  fetchRequests();
+}, []);
 
-  useEffect(() => {
-  filterRequests();
-}, [searchTerm, statusFilter, requests.length]);
+// Исправленный useEffect — зависит от длины массива, а не от самого массива
+useEffect(() => {
+  if (requests.length === 0 && !searchTerm && statusFilter === 'all') return;
+  
+  let filtered = [...requests];
+  
+  if (searchTerm) {
+    filtered = filtered.filter(
+      (req) =>
+        req.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        req.request_number.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+  
+  if (statusFilter !== 'all') {
+    filtered = filtered.filter((req) => req.status === statusFilter);
+  }
+  
+  setFilteredRequests(filtered);
+  setPage(1);
+}, [searchTerm, statusFilter, requests.length]); 
 
   const fetchRequests = async () => {
     try {
