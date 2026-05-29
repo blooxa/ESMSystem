@@ -24,11 +24,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      console.error('Unauthorized! Token may be expired or invalid');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+    // Не возвращайте Promise.reject если не нужно
     return Promise.reject(error);
   }
 );
