@@ -31,7 +31,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && rm -rf ../esm_backend/staticfiles && mv build ../esm_backend/staticfiles",
+    "build": "react-scripts build && rmdir /s /q ..\\esm_backend\\staticfiles 2>nul & xcopy build ..\\esm_backend\\staticfiles /E /I",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

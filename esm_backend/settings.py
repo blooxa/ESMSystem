@@ -105,6 +105,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5000",
     "http://127.0.0.1:8080",
+    'https://esm-t36m.onrender.com',
     # Добавьте URL из Render после деплоя
     # "https://your-frontend.onrender.com",
 ]
