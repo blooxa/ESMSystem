@@ -86,8 +86,8 @@ const MyRequests: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    filterRequests();
-  }, [searchTerm, statusFilter, requests]);
+  filterRequests();
+}, [searchTerm, statusFilter, requests.length]);
 
   const fetchRequests = async () => {
     try {
