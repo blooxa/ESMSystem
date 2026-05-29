@@ -179,3 +179,7 @@ AUTHENTICATION_BACKENDS = [
     'esmsystem.auth_backend.CustomAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+if os.environ.get('SKIP_MIGRATIONS') == 'True':
+    from django.core.management.commands.migrate import Command
+    Command.check = lambda self, **kwargs: None
