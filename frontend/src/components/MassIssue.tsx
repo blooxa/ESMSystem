@@ -105,7 +105,7 @@ const MassIssue: React.FC = () => {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/ppe/get_available_employees/');
+      const response = await api.get('/ppe/get_available_employees/');
       let data = response.data;
 
       if (data && data.results) data = data.results;
@@ -127,7 +127,7 @@ const MassIssue: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await api.get(`/api/mass-issue/get_employee_standards/?employee_id=${employeeId}`);
+      const response = await api.get(`/mass-issue/get_employee_standards/?employee_id=${employeeId}`);
       const employee = availableEmployees.find(e => e.employee_id === employeeId);
       const items = response.data;
 
@@ -235,7 +235,7 @@ const MassIssue: React.FC = () => {
         })),
       };
 
-      const response = await api.post('/api/mass-issue/mass_issue/', requestData);
+      const response = await api.post('/mass-issue/mass_issue/', requestData);
 
       // Сохраняем результаты выдачи
       if (response.data.results) {
@@ -253,7 +253,7 @@ const MassIssue: React.FC = () => {
           const requestId = requestDataFromStorage.request_id;
 
           if (requestId) {
-            await api.post(`/api/requests/${requestId}/complete/`, {
+            await api.post(`/requests/${requestId}/complete/`, {
               comment: 'СИЗ выданы в рамках массовой выдачи'
             });
             console.log(`Request ${requestId} status updated to completed`);

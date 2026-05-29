@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
   const fetchRequestDetails = async (requestId: number) => {
     setDetailsLoading(true);
     try {
-      const response = await api.get(`/api/requests/${requestId}/request_details/`);
+      const response = await api.get(`/requests/${requestId}/request_details/`);
       setRequestDetails(response.data);
       setViewDialogOpen(true);
     } catch (error) {

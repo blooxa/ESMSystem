@@ -183,7 +183,7 @@ const EditRequest: React.FC<EditRequestProps> = ({ open, requestId, onClose, onS
   const fetchRequestData = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/api/requests/${requestId}/request_details/`);
+      const response = await api.get(`/requests/${requestId}/request_details/`);
       const data = response.data;
       setTitle(data.title || '');
       setDescription(data.description || '');
@@ -280,7 +280,7 @@ const EditRequest: React.FC<EditRequestProps> = ({ open, requestId, onClose, onS
 
   const fetchAvailableEmployees = async () => {
     try {
-      const response = await api.get('/api/employees/my_shop_employees/');
+      const response = await api.get('/employees/my_shop_employees/');
       setAvailableEmployees(response.data);
     } catch (error) {
       console.error('Error fetching employees:', error);
@@ -289,7 +289,7 @@ const EditRequest: React.FC<EditRequestProps> = ({ open, requestId, onClose, onS
 
   const fetchNomenclatures = async () => {
     try {
-      const response = await api.get('/api/nomenclatures/');
+      const response = await api.get('/nomenclatures/');
       setNomenclatures(response.data);
     } catch (error) {
       console.error('Error fetching nomenclatures:', error);
@@ -466,7 +466,7 @@ const EditRequest: React.FC<EditRequestProps> = ({ open, requestId, onClose, onS
 
       console.log('Sending update data:', JSON.stringify(requestData, null, 2));
 
-      await api.put(`/api/requests/${requestId}/update_full_request/`, requestData);
+      await api.put(`/requests/${requestId}/update_full_request/`, requestData);
       setSuccess('Заявка успешно обновлена');
 
       setTimeout(() => {

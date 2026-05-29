@@ -58,7 +58,7 @@ const Reports: React.FC = () => {
 
   const fetchUserRole = async () => {
   try {
-    const response = await api.get('/api/users/me/');
+    const response = await api.get('/users/me/');
     console.log('User data:', response.data);
     const role = response.data.role;
     const username = response.data.username;
@@ -85,7 +85,7 @@ const Reports: React.FC = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await api.get('/api/admin/employees/get_all_employees/');
+      const response = await api.get('/admin/employees/get_all_employees/');
       setEmployees(response.data);
     } catch (error) {
       console.error('Error fetching employees:', error);
@@ -94,7 +94,7 @@ const Reports: React.FC = () => {
 
   const fetchPositions = async () => {
     try {
-      const response = await api.get('/api/admin/positions/get_all_positions/');
+      const response = await api.get('/admin/positions/get_all_positions/');
       setPositions(response.data);
     } catch (error) {
       console.error('Error fetching positions:', error);
@@ -103,7 +103,7 @@ const Reports: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await api.get('/api/admin/users/get_all_users/');
+      const response = await api.get('/admin/users/get_all_users/');
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -150,36 +150,36 @@ const Reports: React.FC = () => {
       {
   category: 'Заявки',
   reports: [
-    { title: 'Все заявки', endpoint: '/api/reports/all_requests/', filename: 'all_requests' },
-    { title: 'Заявки по статусам', endpoint: `/api/reports/requests_by_status/${selectedStatus}/`, filename: `requests_by_status_${selectedStatus}` },
-    { title: 'Заявки по пользователям', endpoint: '/api/reports/requests_by_users/', filename: 'requests_by_users' },
-    { title: 'На рассмотрении (Охрана труда)', endpoint: '/api/reports/pending_safety_requests/', filename: 'pending_safety_requests' },
-    { title: 'На рассмотрении (Хоз. отдел)', endpoint: '/api/reports/pending_economic_requests/', filename: 'pending_economic_requests' },
+    { title: 'Все заявки', endpoint: '/reports/all_requests/', filename: 'all_requests' },
+    { title: 'Заявки по статусам', endpoint: `/reports/requests_by_status/${selectedStatus}/`, filename: `requests_by_status_${selectedStatus}` },
+    { title: 'Заявки по пользователям', endpoint: '/reports/requests_by_users/', filename: 'requests_by_users' },
+    { title: 'На рассмотрении (Охрана труда)', endpoint: '/reports/pending_safety_requests/', filename: 'pending_safety_requests' },
+    { title: 'На рассмотрении (Хоз. отдел)', endpoint: '/reports/pending_economic_requests/', filename: 'pending_economic_requests' },
   ],
 },
       {
         category: 'Сотрудники',
         reports: [
-          { title: 'Все сотрудники с размерами', endpoint: '/api/reports/employees_with_sizes/', filename: 'employees_with_sizes' },
-          { title: 'Нормы выдачи СИЗ по сотруднику', endpoint: `/api/reports/employee_ppe_standards/${selectedEmployee}/`, filename: `employee_ppe_standards` },
-          { title: 'Нормы выдачи СИЗ по должности', endpoint: '/api/reports/position_ppe_standards/', filename: 'position_ppe_standards' },
+          { title: 'Все сотрудники с размерами', endpoint: '/reports/employees_with_sizes/', filename: 'employees_with_sizes' },
+          { title: 'Нормы выдачи СИЗ по сотруднику', endpoint: `/reports/employee_ppe_standards/${selectedEmployee}/`, filename: `employee_ppe_standards` },
+          { title: 'Нормы выдачи СИЗ по должности', endpoint: '/reports/position_ppe_standards/', filename: 'position_ppe_standards' },
         ],
       },
       {
         category: 'Выдача СИЗ',
         reports: [
-          { title: 'Все выдачи СИЗ', endpoint: '/api/reports/all_ppe_issues/', filename: 'all_ppe_issues' },
-          { title: 'Выдачи СИЗ по сотруднику', endpoint: `/api/reports/employee_ppe_issues/${selectedEmployee}/`, filename: `employee_ppe_issues` },
-          { title: 'Массовая выдача (по нормам)', endpoint: '/api/reports/mass_issue_report/', filename: 'mass_issue_report' },
+          { title: 'Все выдачи СИЗ', endpoint: '/reports/all_ppe_issues/', filename: 'all_ppe_issues' },
+          { title: 'Выдачи СИЗ по сотруднику', endpoint: `/reports/employee_ppe_issues/${selectedEmployee}/`, filename: `employee_ppe_issues` },
+          { title: 'Массовая выдача (по нормам)', endpoint: '/reports/mass_issue_report/', filename: 'mass_issue_report' },
         ],
       },
       {
         category: 'Администрирование',
         reports: [
-          { title: 'Пользователи системы', endpoint: '/api/reports/users_report/', filename: 'users_report' },
-          { title: 'Цеха', endpoint: '/api/reports/shops_report/', filename: 'shops_report' },
-          { title: 'Должности', endpoint: '/api/reports/positions_report/', filename: 'positions_report' },
-          { title: 'ГОСТ размеры', endpoint: '/api/reports/sizes_report/', filename: 'sizes_report' },
+          { title: 'Пользователи системы', endpoint: '/reports/users_report/', filename: 'users_report' },
+          { title: 'Цеха', endpoint: '/reports/shops_report/', filename: 'shops_report' },
+          { title: 'Должности', endpoint: '/reports/positions_report/', filename: 'positions_report' },
+          { title: 'ГОСТ размеры', endpoint: '/reports/sizes_report/', filename: 'sizes_report' },
         ],
       },
     ],
@@ -187,24 +187,24 @@ const Reports: React.FC = () => {
       {
         category: 'Заявки',
         reports: [
-          { title: 'Все заявки', endpoint: '/api/reports/all_requests/', filename: 'all_requests' },
-          { title: 'Заявки по статусам', endpoint: `/api/reports/requests_by_status/${selectedStatus}/`, filename: `requests_by_status_${selectedStatus}` },
-          { title: 'Заявки по пользователям', endpoint: '/api/reports/requests_by_users/', filename: 'requests_by_users' },
-          { title: 'На рассмотрении (Хоз. отдел)', endpoint: '/api/reports/pending_economic_requests/', filename: 'pending_economic_requests' },
+          { title: 'Все заявки', endpoint: '/reports/all_requests/', filename: 'all_requests' },
+          { title: 'Заявки по статусам', endpoint: `/reports/requests_by_status/${selectedStatus}/`, filename: `requests_by_status_${selectedStatus}` },
+          { title: 'Заявки по пользователям', endpoint: '/reports/requests_by_users/', filename: 'requests_by_users' },
+          { title: 'На рассмотрении (Хоз. отдел)', endpoint: '/reports/pending_economic_requests/', filename: 'pending_economic_requests' },
         ],
       },
       {
         category: 'Сотрудники',
         reports: [
-          { title: 'Сотрудники с размерами', endpoint: '/api/reports/my_shop_employees_with_sizes/', filename: 'my_shop_employees_with_sizes' },
+          { title: 'Сотрудники с размерами', endpoint: '/reports/my_shop_employees_with_sizes/', filename: 'my_shop_employees_with_sizes' },
         ],
       },
       {
         category: 'Выдача СИЗ',
         reports: [
-          { title: 'Все выдачи СИЗ', endpoint: '/api/reports/all_ppe_issues/', filename: 'all_ppe_issues' },
-          { title: 'Выдачи СИЗ по сотруднику', endpoint: `/api/reports/employee_ppe_issues/${selectedEmployee}/`, filename: `employee_ppe_issues` },
-          { title: 'Массовая выдача (по нормам)', endpoint: '/api/reports/mass_issue_report/', filename: 'mass_issue_report' },
+          { title: 'Все выдачи СИЗ', endpoint: '/reports/all_ppe_issues/', filename: 'all_ppe_issues' },
+          { title: 'Выдачи СИЗ по сотруднику', endpoint: `/reports/employee_ppe_issues/${selectedEmployee}/`, filename: `employee_ppe_issues` },
+          { title: 'Массовая выдача (по нормам)', endpoint: '/reports/mass_issue_report/', filename: 'mass_issue_report' },
         ],
       },
     ],
@@ -212,17 +212,17 @@ const Reports: React.FC = () => {
       {
         category: 'Заявки',
         reports: [
-          { title: 'Все заявки', endpoint: '/api/reports/all_requests/', filename: 'all_requests' },
-          { title: 'Заявки по статусам', endpoint: `/api/reports/requests_by_status/${selectedStatus}/`, filename: `requests_by_status_${selectedStatus}` },
-          { title: 'Заявки по пользователям', endpoint: '/api/reports/requests_by_users/', filename: 'requests_by_users' },
-          { title: 'На рассмотрении (Охрана труда)', endpoint: '/api/reports/pending_safety_requests/', filename: 'pending_safety_requests' },
+          { title: 'Все заявки', endpoint: '/reports/all_requests/', filename: 'all_requests' },
+          { title: 'Заявки по статусам', endpoint: `/reports/requests_by_status/${selectedStatus}/`, filename: `requests_by_status_${selectedStatus}` },
+          { title: 'Заявки по пользователям', endpoint: '/reports/requests_by_users/', filename: 'requests_by_users' },
+          { title: 'На рассмотрении (Охрана труда)', endpoint: '/reports/pending_safety_requests/', filename: 'pending_safety_requests' },
         ],
       },
       {
         category: 'Нормы выдачи',
         reports: [
-          { title: 'Нормы выдачи СИЗ по сотруднику', endpoint: `/api/reports/employee_ppe_standards/${selectedEmployee}/`, filename: `employee_ppe_standards` },
-          { title: 'Нормы выдачи СИЗ по должности', endpoint: '/api/reports/position_ppe_standards/', filename: 'position_ppe_standards' },
+          { title: 'Нормы выдачи СИЗ по сотруднику', endpoint: `/reports/employee_ppe_standards/${selectedEmployee}/`, filename: `employee_ppe_standards` },
+          { title: 'Нормы выдачи СИЗ по должности', endpoint: '/reports/position_ppe_standards/', filename: 'position_ppe_standards' },
         ],
       },
     ],
@@ -230,15 +230,15 @@ const Reports: React.FC = () => {
       {
         category: 'Мои заявки',
         reports: [
-          { title: 'Мои заявки', endpoint: '/api/reports/my_requests/', filename: 'my_requests' },
-          { title: 'Мои заявки по статусам', endpoint: `/api/reports/my_requests_by_status/${selectedStatus}/`, filename: `my_requests_by_status_${selectedStatus}` },
+          { title: 'Мои заявки', endpoint: '/reports/my_requests/', filename: 'my_requests' },
+          { title: 'Мои заявки по статусам', endpoint: `/reports/my_requests_by_status/${selectedStatus}/`, filename: `my_requests_by_status_${selectedStatus}` },
         ],
       },
       {
         category: 'Сотрудники',
         reports: [
-          { title: 'Сотрудники цеха с размерами', endpoint: '/api/reports/my_shop_employees_with_sizes/', filename: 'my_shop_employees_with_sizes' },
-          { title: 'Нормы выдачи СИЗ для сотрудников', endpoint: '/api/reports/my_shop_employee_standards/', filename: 'my_shop_employee_standards' },
+          { title: 'Сотрудники цеха с размерами', endpoint: '/reports/my_shop_employees_with_sizes/', filename: 'my_shop_employees_with_sizes' },
+          { title: 'Нормы выдачи СИЗ для сотрудников', endpoint: '/reports/my_shop_employee_standards/', filename: 'my_shop_employee_standards' },
         ],
       },
     ],
@@ -246,8 +246,8 @@ const Reports: React.FC = () => {
       {
         category: 'Мои заявки',
         reports: [
-          { title: 'Мои заявки', endpoint: '/api/reports/my_requests/', filename: 'my_requests' },
-          { title: 'Мои заявки по статусам', endpoint: `/api/reports/my_requests_by_status/${selectedStatus}/`, filename: `my_requests_by_status_${selectedStatus}` },
+          { title: 'Мои заявки', endpoint: '/reports/my_requests/', filename: 'my_requests' },
+          { title: 'Мои заявки по статусам', endpoint: `/reports/my_requests_by_status/${selectedStatus}/`, filename: `my_requests_by_status_${selectedStatus}` },
         ],
       },
     ],

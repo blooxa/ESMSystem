@@ -222,7 +222,7 @@ const CreateRequest: React.FC<CreateRequestProps> = ({ open, onClose, onSuccess,
       let response;
       if (isRestricted) {
         console.log('Fetching only shop employees...');
-        response = await api.get('/api/employees/my_shop_employees/');
+        response = await api.get('/employees/my_shop_employees/');
       } else {
         console.log('Fetching ALL employees...');
         response = await ppeApi.getAvailableEmployees();

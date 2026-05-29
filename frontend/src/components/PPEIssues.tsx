@@ -120,9 +120,9 @@ const PPEIssues: React.FC = () => {
   const fetchSizes = async () => {
     try {
       const [clothingRes, footwearRes, headwearRes] = await Promise.all([
-        api.get('/api/admin/sizes/by-type-gender/?size_type=clothing'),
-        api.get('/api/admin/sizes/by-type-gender/?size_type=footwear'),
-        api.get('/api/admin/sizes/by-type-gender/?size_type=headwear'),
+        api.get('/admin/sizes/by-type-gender/?size_type=clothing'),
+        api.get('/admin/sizes/by-type-gender/?size_type=footwear'),
+        api.get('/admin/sizes/by-type-gender/?size_type=headwear'),
       ]);
 
       setClothingSizes(clothingRes.data.map((s: any) => ({
@@ -215,7 +215,7 @@ const PPEIssues: React.FC = () => {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/ppe/get_available_employees/');
+      const response = await api.get('/ppe/get_available_employees/');
       let data = response.data;
 
       if (data && data.results) {
@@ -245,7 +245,7 @@ const PPEIssues: React.FC = () => {
   const fetchEmployeeIssues = async (employeeId: number) => {
     setIssuesLoading(true);
     try {
-      const response = await api.get(`/api/ppe-issues/get_employee_issues/?employee_id=${employeeId}`);
+      const response = await api.get(`/ppe-issues/get_employee_issues/?employee_id=${employeeId}`);
       let data = response.data;
 
       if (data && data.results) {
@@ -271,7 +271,7 @@ const PPEIssues: React.FC = () => {
 
   const fetchNomenclatures = async () => {
     try {
-      const response = await api.get('/api/nomenclatures/');
+      const response = await api.get('/nomenclatures/');
       let data = response.data;
 
       if (data && data.results) {

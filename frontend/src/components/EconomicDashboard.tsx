@@ -168,7 +168,7 @@ const EconomicDashboard: React.FC = () => {
     setLoading(true);
     console.log('=== FETCHING REQUESTS ===');
 
-    const response = await api.get('/api/requests/');
+    const response = await api.get('/requests/');
     console.log('RAW response:', response);
     console.log('Response status:', response.status);
     console.log('Response data:', JSON.stringify(response.data, null, 2));

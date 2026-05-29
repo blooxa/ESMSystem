@@ -131,13 +131,13 @@ const AdminPanel: React.FC = () => {
     setLoading(true);
     try {
       const [usersRes, shopsRes, employeesRes, positionsRes, clothingSizesRes, footwearSizesRes, headwearSizesRes] = await Promise.all([
-        api.get('/api/admin/users/get_all_users/'),
-        api.get('/api/admin/shops/get_all_shops/'),
-        api.get('/api/admin/employees/get_all_employees/'),
-        api.get('/api/admin/positions/get_all_positions/'),
-        api.get('/api/admin/sizes/get_all_sizes/?size_type=clothing'),
-        api.get('/api/admin/sizes/get_all_sizes/?size_type=footwear'),
-        api.get('/api/admin/sizes/get_all_sizes/?size_type=headwear'),
+        api.get('/admin/users/get_all_users/'),
+        api.get('/admin/shops/get_all_shops/'),
+        api.get('/admin/employees/get_all_employees/'),
+        api.get('/admin/positions/get_all_positions/'),
+        api.get('/admin/sizes/get_all_sizes/?size_type=clothing'),
+        api.get('/admin/sizes/get_all_sizes/?size_type=footwear'),
+        api.get('/admin/sizes/get_all_sizes/?size_type=headwear'),
       ]);
       setUsers(usersRes.data);
       setShops(shopsRes.data);
@@ -156,7 +156,7 @@ const AdminPanel: React.FC = () => {
   // CRUD для пользователей
   const handleCreateUser = async () => {
     try {
-      await api.post('/api/admin/users/create_user/', {
+      await api.post('/admin/users/create_user/', {
         login: userForm.login,
         password: userForm.password,
         role: userForm.role,
@@ -196,7 +196,7 @@ const AdminPanel: React.FC = () => {
       if (userForm.password) {
         updateData.password = userForm.password;
       }
-      await api.put('/api/admin/users/update_user/', updateData);
+      await api.put('/admin/users/update_user/', updateData);
       setSuccess('Пользователь обновлен');
       fetchAllData();
       setUserDialogOpen(false);
@@ -211,7 +211,7 @@ const AdminPanel: React.FC = () => {
   const handleDeleteUser = async (userId: number) => {
     if (window.confirm('Удалить пользователя?')) {
       try {
-        await api.delete('/api/admin/users/delete_user/', { data: { user_id: userId } });
+        await api.delete('/admin/users/delete_user/', { data: { user_id: userId } });
         setSuccess('Пользователь удален');
         fetchAllData();
       } catch (err) {
@@ -223,7 +223,7 @@ const AdminPanel: React.FC = () => {
   // CRUD для цехов
   const handleCreateShop = async () => {
     try {
-      await api.post('/api/admin/shops/create_shop/', { title: shopForm.title, code: shopForm.code });
+      await api.post('/admin/shops/create_shop/', { title: shopForm.title, code: shopForm.code });
       setSuccess('Цех создан');
       fetchAllData();
       setShopDialogOpen(false);
@@ -241,7 +241,7 @@ const AdminPanel: React.FC = () => {
 
   const handleUpdateShop = async () => {
     try {
-      await api.put('/api/admin/shops/update_shop/', { shop_id: shopForm.shop_id, title: shopForm.title, code: shopForm.code });
+      await api.put('/admin/shops/update_shop/', { shop_id: shopForm.shop_id, title: shopForm.title, code: shopForm.code });
       setSuccess('Цех обновлен');
       fetchAllData();
       setShopDialogOpen(false);
@@ -255,7 +255,7 @@ const AdminPanel: React.FC = () => {
   const handleDeleteShop = async (shopId: number) => {
     if (window.confirm('Удалить цех?')) {
       try {
-        await api.delete('/api/admin/shops/delete_shop/', { data: { shop_id: shopId } });
+        await api.delete('/admin/shops/delete_shop/', { data: { shop_id: shopId } });
         setSuccess('Цех удален');
         fetchAllData();
       } catch (err) {
@@ -315,7 +315,7 @@ const AdminPanel: React.FC = () => {
         headsize: employeeForm.headsize && employeeForm.headsize !== '' ? Number(employeeForm.headsize) : null,
       };
 
-      await api.post('/api/admin/employees/create_employee/', createData);
+      await api.post('/admin/employees/create_employee/', createData);
       setSuccess('Сотрудник создан');
       fetchAllData();
       setEmployeeDialogOpen(false);
@@ -394,7 +394,7 @@ const AdminPanel: React.FC = () => {
         is_active: employeeForm.is_active,
       };
 
-      await api.put('/api/admin/employees/update_employee/', updateData);
+      await api.put('/admin/employees/update_employee/', updateData);
       setSuccess('Сотрудник обновлен');
       fetchAllData();
       setEmployeeDialogOpen(false);
@@ -420,7 +420,7 @@ const AdminPanel: React.FC = () => {
   // CRUD для должностей
   const handleCreatePosition = async () => {
     try {
-      await api.post('/api/admin/positions/create_position/', { title: positionForm.title });
+      await api.post('/admin/positions/create_position/', { title: positionForm.title });
       setSuccess('Должность создана');
       fetchAllData();
       setPositionDialogOpen(false);
@@ -438,7 +438,7 @@ const AdminPanel: React.FC = () => {
 
   const handleUpdatePosition = async () => {
     try {
-      await api.put('/api/admin/positions/update_position/', { position_id: positionForm.position_id, title: positionForm.title });
+      await api.put('/admin/positions/update_position/', { position_id: positionForm.position_id, title: positionForm.title });
       setSuccess('Должность обновлена');
       fetchAllData();
       setPositionDialogOpen(false);
@@ -464,7 +464,7 @@ const AdminPanel: React.FC = () => {
   // CRUD для размеров
   const handleCreateSize = async () => {
     try {
-      await api.post('/api/admin/sizes/create_size/', { ...sizeForm, size_type: currentSizeType });
+      await api.post('/admin/sizes/create_size/', { ...sizeForm, size_type: currentSizeType });
       setSuccess('Размер создан');
       fetchAllData();
       setSizeDialogOpen(false);
@@ -483,7 +483,7 @@ const AdminPanel: React.FC = () => {
 
   const handleUpdateSize = async () => {
     try {
-      await api.put('/api/admin/sizes/update_size/', { ...sizeForm, size_type: currentSizeType });
+      await api.put('/admin/sizes/update_size/', { ...sizeForm, size_type: currentSizeType });
       setSuccess('Размер обновлен');
       fetchAllData();
       setSizeDialogOpen(false);
@@ -497,7 +497,7 @@ const AdminPanel: React.FC = () => {
   const handleDeleteSize = async (sizeId: number, type: string) => {
     if (window.confirm('Удалить размер?')) {
       try {
-        await api.delete('/api/admin/sizes/delete_size/', { data: { size_id: sizeId, size_type: type } });
+        await api.delete('/admin/sizes/delete_size/', { data: { size_id: sizeId, size_type: type } });
         setSuccess('Размер удален');
         fetchAllData();
       } catch (err) {
