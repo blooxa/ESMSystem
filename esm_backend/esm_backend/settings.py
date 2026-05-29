@@ -11,8 +11,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-@qpx@0b5mrhe*7
 # DEBUG должен быть False в продакшене
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# Разрешаем все хосты на Render (временно)
-ALLOWED_HOSTS = ['*']  # Потом замените на '.onrender.com', 'localhost', '127.0.0.1'
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -69,11 +69,12 @@ if DATABASE_URL:
     # Если мы на Render (есть DATABASE_URL), используем PostgreSQL
     DATABASES = {
         'default': dj_database_url.config(
-            default=DATABASE_URL,
+            default=os.environ.get('DATABASE_URL'),
             conn_max_age=600,
             conn_health_checks=True,
         )
     }
+
 else:
     # Локальная разработка
     DATABASES = {
