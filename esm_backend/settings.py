@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+     'channels',
     'esmsystem',
 ]
 
@@ -58,7 +59,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'esm_backend.wsgi.application'
-#ASGI_APPLICATION = 'esm_backend.asgi.application'
+ASGI_APPLICATION = 'esm_backend.asgi.application'
 
 # ------ КЛЮЧЕВОЙ МОМЕНТ: Настройка БД для Render ------
 # Render автоматически добавит переменную DATABASE_URL
