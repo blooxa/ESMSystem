@@ -119,7 +119,7 @@ const EmployeeManagement: React.FC = () => {
 
       // Если админ - загружаем всех сотрудников
       if (isSuperuser || userRole === 'admin') {
-        response = await api.get('/api/admin/employees/get_all_employees/');
+        response = await api.get('/admin/employees/get_all_employees/');
       } else {
         // Иначе - только сотрудников цеха
         response = await employeesApi.getMyShopEmployees();
@@ -198,7 +198,7 @@ const EmployeeManagement: React.FC = () => {
   const fetchEmployeeHistory = async (employeeId: number) => {
     setHistoryLoading(true);
     try {
-      const response = await api.get(`/api/ppe-issues/get_employee_issues/?employee_id=${employeeId}`);
+      const response = await api.get(`/ppe-issues/get_employee_issues/?employee_id=${employeeId}`);
       let data = response.data;
       if (data && data.results) data = data.results;
       if (data && data.data) data = data.data;
