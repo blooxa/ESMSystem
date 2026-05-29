@@ -383,7 +383,7 @@ const SafetyDashboard: React.FC = () => {
   // Получение роли пользователя
  const fetchUserRole = async () => {
   try {
-    const response = await api.get('/api/users/me/');
+    const response = await api.get('/users/me/');
     console.log('=== USER ROLE DEBUG ===');
     console.log('Full response:', response.data);
     console.log('User role:', response.data.role);
@@ -398,7 +398,7 @@ const fetchRequests = async () => {
     setLoading(true);
     setError('');
     // Для охраны труда
-    const response = await api.get('/api/requests/safety_pending_requests/');
+    const response = await api.get('/requests/safety_pending_requests/');
     const data = Array.isArray(response.data) ? response.data : [];
     setRequests(data);
   } catch (error) {
@@ -412,7 +412,7 @@ const fetchRequests = async () => {
 const fetchRequestDetails = async (requestId: number) => {
   setDetailsLoading(true);
   try {
-    const response = await api.get(`/api/requests/${requestId}/request_details/`);
+    const response = await api.get(`/requests/${requestId}/request_details/`);
     setRequestDetails(response.data);
     setViewDialogOpen(true);
   } catch (error) {
@@ -425,7 +425,7 @@ const fetchRequestDetails = async (requestId: number) => {
   const fetchNomenclatures = async () => {
     try {
       console.log('Загрузка списка СИЗ...');
-      const response = await api.get('/api/safety/nomenclatures/');
+      const response = await api.get('/safety/nomenclatures/');
       console.log('Ответ от сервера:', response.data);
       const data = Array.isArray(response.data) ? response.data : [];
       setNomenclatures(data);
@@ -441,9 +441,9 @@ const fetchRequestDetails = async (requestId: number) => {
       console.log('Загрузка данных...');
 
       const [positionsRes, nomenclaturesRes, standardsRes] = await Promise.all([
-        api.get('/api/admin/positions/get_all_positions/'),
-        api.get('/api/safety/nomenclatures/', { params: { all: true } }),
-        api.get('/api/safety/standards/'),
+        api.get('/admin/positions/get_all_positions/'),
+        api.get('/safety/nomenclatures/', { params: { all: true } }),
+        api.get('/safety/standards/'),
       ]);
 
       let nomenclaturesData = nomenclaturesRes.data;
@@ -494,7 +494,7 @@ const fetchRequestDetails = async (requestId: number) => {
   const handleApproveBySafety = async (request: Request) => {
     setSubmitting(true);
     try {
-      await api.post(`/api/requests/${request.request_id}/approve_by_safety/`, {
+      await api.post(`/requests/${request.request_id}/approve_by_safety/`, {
         comment: 'Одобрено отделом охраны труда'
       });
       setSuccess(`Заявка ${request.request_number} одобрена охраной труда`);
@@ -513,7 +513,7 @@ const fetchRequestDetails = async (requestId: number) => {
   const handleApproveByEconomic = async (request: Request) => {
     setSubmitting(true);
     try {
-      await api.post(`/api/requests/${request.request_id}/approve_by_economic/`, {
+      await api.post(`/requests/${request.request_id}/approve_by_economic/`, {
         comment: 'Одобрено хозяйственным отделом'
       });
       setSuccess(`Заявка ${request.request_number} одобрена хоз. отделом`);
@@ -533,9 +533,9 @@ const fetchRequestDetails = async (requestId: number) => {
     if (!selectedRequest) return;
     setSubmitting(true);
     try {
-      let endpoint = `/api/requests/${selectedRequest.request_id}/reject_by_safety/`;
+      let endpoint = `/requests/${selectedRequest.request_id}/reject_by_safety/`;
       if (selectedRequest.status === 'hr_approved') {
-        endpoint = `/api/requests/${selectedRequest.request_id}/reject_by_economic/`;
+        endpoint = `/requests/${selectedRequest.request_id}/reject_by_economic/`;
       }
       await api.post(endpoint, { comment: rejectComment });
       setSuccess(`Заявка ${selectedRequest.request_number} отклонена`);
@@ -558,7 +558,7 @@ const fetchRequestDetails = async (requestId: number) => {
       return;
     }
     try {
-      await api.post('/api/safety/standards/create_standard/', standardForm);
+      await api.post('/safety/standards/create_standard/', standardForm);
       setSuccess('Норма добавлена');
       fetchStandardsData();
       setStandardDialogOpen(false);
@@ -571,7 +571,7 @@ const fetchRequestDetails = async (requestId: number) => {
   const handleUpdateStandard = async () => {
     if (!currentStandard) return;
     try {
-      await api.put('/api/safety/standards/update_standard/', {
+      await api.put('/safety/standards/update_standard/', {
         standard_id: currentStandard.standard_id,
         quantity: standardForm.quantity,
         period_months: standardForm.period_months,
@@ -589,7 +589,7 @@ const fetchRequestDetails = async (requestId: number) => {
   const handleDeleteStandard = async () => {
     if (!standardToDelete) return;
     try {
-      await api.delete('/api/safety/standards/delete_standard/', { data: { standard_id: standardToDelete.standard_id } });
+      await api.delete('/safety/standards/delete_standard/', { data: { standard_id: standardToDelete.standard_id } });
       setSuccess('Норма удалена');
       fetchStandardsData();
       setDeleteConfirmOpen(false);
@@ -643,7 +643,7 @@ const fetchRequestDetails = async (requestId: number) => {
     }
     try {
       console.log('Создание СИЗ:', nomenclatureForm);
-      const response = await api.post('/api/safety/nomenclatures/', {
+      const response = await api.post('/safety/nomenclatures/', {
         title: nomenclatureForm.title,
         unit: nomenclatureForm.unit,
         shelf_life_months: nomenclatureForm.shelf_life_months,
@@ -668,7 +668,7 @@ const fetchRequestDetails = async (requestId: number) => {
     console.log('Обновление СИЗ:', editingNomenclature.nomenclature_id, nomenclatureForm);
 
     // Отправляем PUT запрос с ID в URL и данными в теле
-    const response = await api.put(`/api/safety/nomenclatures/${editingNomenclature.nomenclature_id}/`, {
+    const response = await api.put(`/safety/nomenclatures/${editingNomenclature.nomenclature_id}/`, {
       title: nomenclatureForm.title,
       unit: nomenclatureForm.unit,
       shelf_life_months: nomenclatureForm.shelf_life_months,

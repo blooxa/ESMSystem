@@ -171,7 +171,7 @@ const CreateRequest: React.FC<CreateRequestProps> = ({ open, onClose, onSuccess,
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        const response = await api.get('/api/users/me/');
+        const response = await api.get('/users/me/');
         console.log('=== User data from API ===');
         console.log('Full response:', response.data);
         const role = response.data.role;

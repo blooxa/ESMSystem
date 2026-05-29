@@ -103,7 +103,7 @@ const EmployeeManagement: React.FC = () => {
 
   const fetchUserInfo = async () => {
     try {
-      const response = await api.get('/api/users/me/');
+      const response = await api.get('/users/me/');
       setUser({ role: response.data.role, is_superuser: response.data.is_superuser });
       fetchEmployees(response.data.role, response.data.is_superuser);
     } catch (err) {

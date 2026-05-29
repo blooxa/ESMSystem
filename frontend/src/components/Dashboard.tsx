@@ -147,7 +147,7 @@ const Dashboard: React.FC = () => {
 
   const fetchUserInfo = async () => {
     try {
-      const response = await api.get('/api/users/me/');
+      const response = await api.get('/users/me/');
       setUserRole(response.data.role);
     } catch (error) {
       console.error('Error fetching user info:', error);
