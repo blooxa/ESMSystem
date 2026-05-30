@@ -258,7 +258,7 @@ const EconomicDashboard: React.FC = () => {
     setDetailsLoading(true);
     try {
       console.log('Fetching details for request ID:', requestId);
-      const response = await api.get(`/api/requests/${requestId}/request_details/`);
+      const response = await api.get(`/requests/${requestId}/request_details/`);
       console.log('Request details response:', response.data);
       setRequestDetails(response.data);
 
@@ -287,7 +287,7 @@ const EconomicDashboard: React.FC = () => {
     setSelectedRequest(request);
     setDetailsLoading(true);
     try {
-      const response = await api.get(`/api/requests/${request.request_id}/request_details/`);
+      const response = await api.get(`/requests/${request.request_id}/request_details/`);
       const details = response.data;
 
       const issueData = {
@@ -324,7 +324,7 @@ const EconomicDashboard: React.FC = () => {
     setSelectedRequest(request);
     setDetailsLoading(true);
     try {
-      const response = await api.get(`/api/requests/${request.request_id}/request_details/`);
+      const response = await api.get(`/requests/${request.request_id}/request_details/`);
       prepareDeliveryItems(response.data);
       setDeliveryDialogOpen(true);
     } catch (error) {
@@ -550,7 +550,7 @@ const EconomicDashboard: React.FC = () => {
         setDetailsLoading(true);
         try {
           console.log('Loading order items for request:', selectedRequest.request_id);
-          const response = await api.get(`/api/requests/${selectedRequest.request_id}/request_details/`);
+          const response = await api.get(`/requests/${selectedRequest.request_id}/request_details/`);
           console.log('Order items response:', response.data);
           prepareOrderItems(response.data);
         } catch (error) {
@@ -875,7 +875,7 @@ const EconomicDashboard: React.FC = () => {
                                   setSelectedRequest(request);
                                   setDetailsLoading(true);
                                   try {
-                                    const response = await api.get(`/api/requests/${request.request_id}/request_details/`);
+                                    const response = await api.get(`/requests/${request.request_id}/request_details/`);
                                     prepareOrderItems(response.data);
                                     setOrderDialogOpen(true);
                                   } catch (error) {
