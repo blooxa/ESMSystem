@@ -199,13 +199,12 @@ const EditRequest: React.FC<EditRequestProps> = ({ open, requestId, onClose, onS
         shoesize: emp.shoesize,
         headsize: emp.headsize,
         items: emp.items.map((item: any) => {
-          // Передаем unit в функцию определения типа
-          const sizeType = detectSizeType(item.nomenclature_title, item.unit);
-          const isLiquid = sizeType === 'nosize';
-          console.log(`Item: ${item.nomenclature_title}, unit: ${item.unit}, sizeType: ${sizeType}, isLiquid: ${isLiquid}`);
-          return {
-            nomenclature_id: item.nomenclature_id,
-            nomenclature_title: item.nomenclature_title,
+  const sizeType = detectSizeType(item.nomenclature_title, item.unit);
+  const isLiquid = sizeType === 'nosize';
+  console.log('Item from API:', item); // Добавь эту строку
+  return {
+    nomenclature_id: item.nomenclature_id || item.id || item.nomenclatureId, // ← пробуем разные варианты
+    nomenclature_title: item.nomenclature_title,
             unit: item.unit,
             standard_quantity: item.quantity,
             period_months: 12,
