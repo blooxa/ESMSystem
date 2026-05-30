@@ -386,16 +386,21 @@ const EditRequest: React.FC<EditRequestProps> = ({ open, requestId, onClose, onS
   };
 
   const removeEmployeeItem = (employeeId: number, nomenclatureId: number) => {
-    setEmployees(prev => prev.map(emp => {
+  console.log('Removing item:', { employeeId, nomenclatureId });
+  setEmployees(prev => {
+    const newState = prev.map(emp => {
       if (emp.employee_id === employeeId) {
-        return {
-          ...emp,
-          items: emp.items.filter(item => item.nomenclature_id !== nomenclatureId),
-        };
+        const newItems = emp.items.filter(item => item.nomenclature_id !== nomenclatureId);
+        console.log('Old items:', emp.items.map(i => i.nomenclature_id));
+        console.log('New items:', newItems.map(i => i.nomenclature_id));
+        return { ...emp, items: newItems };
       }
       return emp;
-    }));
-  };
+    });
+    console.log('New employees state:', newState.map(e => ({ id: e.employee_id, itemsCount: e.items.length })));
+    return newState;
+  });
+};
 
   const updateEmployeeItem = (
     employeeId: number,
@@ -429,58 +434,58 @@ const EditRequest: React.FC<EditRequestProps> = ({ open, requestId, onClose, onS
   };
 
   const handleSubmit = async () => {
-    if (!title || employees.length === 0) {
-      setError('Заполните название заявки и добавьте хотя бы одного сотрудника');
-      return;
-    }
+  if (!title || employees.length === 0) {
+    setError('Заполните название заявки и добавьте хотя бы одного сотрудника');
+    return;
+  }
 
-    for (const emp of employees) {
-      for (const item of emp.items) {
-        // Проверяем размер только для НЕ жидкостей
-        if (!item.is_liquid && item.selected_quantity > 0 && (!item.selected_size || item.selected_size === '')) {
-          setError(`Для сотрудника ${emp.full_name} укажите размер для ${item.nomenclature_title}`);
-          return;
-        }
+  for (const emp of employees) {
+    for (const item of emp.items) {
+      if (!item.is_liquid && item.selected_quantity > 0 && (!item.selected_size || item.selected_size === '')) {
+        setError(`Для сотрудника ${emp.full_name} укажите размер для ${item.nomenclature_title}`);
+        return;
       }
     }
+  }
 
-    setSubmitting(true);
-    setError('');
+  setSubmitting(true);
+  setError('');
 
-    try {
-      const requestData = {
-        title,
-        description,
-        employees: employees.map(emp => ({
-          employee_id: emp.employee_id,
-          height: emp.height,
-          items: emp.items
-  .filter(item => item.selected_quantity > 0)
-  .map(item => ({
-    nomenclature_id: item.nomenclature_id,  // ← это поле должно быть
-    size: item.is_liquid ? '' : item.selected_size,  // ← поле size, не selected_size
-    quantity: item.selected_quantity,  // ← поле quantity, не selected_quantity
-  })),
-      };
+  try {
+    const requestData = {
+      title,
+      description,
+      employees: employees.map(emp => ({
+        employee_id: emp.employee_id,
+        height: emp.height,
+        items: emp.items
+          .filter(item => item.selected_quantity > 0)
+          .map(item => ({
+            nomenclature_id: item.nomenclature_id,
+            size: item.is_liquid ? '' : item.selected_size,
+            quantity: item.selected_quantity,
+          })),
+      })),
+    };
 
-      console.log('Sending update data:', JSON.stringify(requestData, null, 2));
+    console.log('Sending update data:', JSON.stringify(requestData, null, 2));
 
-      await api.put(`/requests/${requestId}/update_full_request/`, requestData);
-      setSuccess('Заявка успешно обновлена');
+    await api.put(`/requests/${requestId}/update_full_request/`, requestData);
+    setSuccess('Заявка успешно обновлена');
 
-      setTimeout(() => {
-        onSuccess();
-        onClose();
-      }, 1500);
+    setTimeout(() => {
+      onSuccess();
+      onClose();
+    }, 1500);
 
-    } catch (err: any) {
-      console.error('Error updating request:', err);
-      console.error('Error response:', err.response?.data);
-      setError(err.response?.data?.error || 'Ошибка при сохранении изменений');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  } catch (err: any) {
+    console.error('Error updating request:', err);
+    console.error('Error response:', err.response?.data);
+    setError(err.response?.data?.error || 'Ошибка при сохранении изменений');
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const getSizeTypeIcon = (type: string) => {
     switch (type) {
