@@ -115,7 +115,7 @@ class MassIssueViewSet(viewsets.ViewSet):
             app_user = AppUser.objects.get(login=request.user.username)
 
             # Проверяем права (только admin и economic_head)
-            if not (request.user.is_superuser or app_user.role in ['admin', 'economic_head']):
+            if not (request.user.is_superuser or app_user.role in ['admin', 'economic_head', 'department_head']):
                 return Response({'error': 'Доступ запрещен'}, status=403)
 
             data = request.data
@@ -3405,8 +3405,12 @@ class NomenclatureViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['title']
 
 class AdminSizeStandardViewSet(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated, IsAdminUserPermission]
+    permission_classes = [IsAuthenticated]
 
+    def get_permissions(self):
+        if self.action in ['create_size', 'update_size', 'delete_size']:
+            return [IsAuthenticated(), IsAdminUserPermission()]
+        return [IsAuthenticated()]
     @action(detail=False, methods=['get'])
     def get_all_sizes(self, request):
         from .models import ClothingSizeGOST, FootwearSizeGOST, HeadwearSizeGOST
