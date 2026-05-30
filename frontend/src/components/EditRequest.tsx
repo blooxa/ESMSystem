@@ -390,13 +390,10 @@ const EditRequest: React.FC<EditRequestProps> = ({ open, requestId, onClose, onS
     const newState = prev.map(emp => {
       if (emp.employee_id === employeeId) {
         const newItems = emp.items.filter(item => item.nomenclature_id !== nomenclatureId);
-        console.log('Old items:', emp.items.map(i => i.nomenclature_id));
-        console.log('New items:', newItems.map(i => i.nomenclature_id));
         return { ...emp, items: newItems };
       }
       return emp;
     });
-    console.log('New employees state:', newState.map(e => ({ id: e.employee_id, itemsCount: e.items.length })));
     return newState;
   });
 };
