@@ -744,7 +744,7 @@ class RequestViewSet(viewsets.ModelViewSet):
                     for item in items:
                         if item.nomenclature:
                             employee_data['items'].append({
-                                'nomenclature_id': item.nomenclature.nomenclature_id,
+                                'nomenclatureID': item.nomenclature.nomenclature_id,  # ← эта строка должна быть
                                 'nomenclature_title': item.nomenclature.title,
                                 'size': item.size or '',
                                 'quantity': float(item.quantity) if item.quantity else 0,

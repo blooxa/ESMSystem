@@ -203,7 +203,7 @@ const EditRequest: React.FC<EditRequestProps> = ({ open, requestId, onClose, onS
   const isLiquid = sizeType === 'nosize';
   console.log('Item from API:', item); // Добавь эту строку
   return {
-    nomenclature_id: item.nomenclatureId, // ← пробуем разные варианты
+    nomenclature_id: item.nomenclature_id, // ← пробуем разные варианты
     nomenclature_title: item.nomenclature_title,
             unit: item.unit,
             standard_quantity: item.quantity,
