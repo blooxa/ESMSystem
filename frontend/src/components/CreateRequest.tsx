@@ -413,16 +413,37 @@ const CreateRequest: React.FC<CreateRequestProps> = ({ open, onClose, onSuccess,
 
   // Новая функция для удаления отдельного СИЗ у сотрудника
   const removeEmployeeItem = (employeeId: number, nomenclatureId: number) => {
-    setEmployees(prev => prev.map(emp => {
+  console.log('=== REMOVE ITEM DEBUG ===');
+  console.log('employeeId:', employeeId);
+  console.log('nomenclatureId to remove:', nomenclatureId);
+
+  const employee = employees.find(e => e.employee_id === employeeId);
+  if (employee) {
+    console.log('Current items IDs:', employee.items.map(i => i.nomenclature_id));
+  }
+
+  setEmployees(prev => {
+    const newState = prev.map(emp => {
       if (emp.employee_id === employeeId) {
-        return {
-          ...emp,
-          items: emp.items.filter(item => item.nomenclature_id !== nomenclatureId),
-        };
+        const newItems = emp.items.filter(item => {
+          const shouldKeep = item.nomenclature_id !== nomenclatureId;
+          if (!shouldKeep) {
+            console.log(`Removing item with ID: ${item.nomenclature_id} (${item.nomenclature_title})`);
+          }
+          return shouldKeep;
+        });
+        return { ...emp, items: newItems };
       }
       return emp;
-    }));
-  };
+    });
+
+    // Проверяем результат
+    const updatedEmployee = newState.find(e => e.employee_id === employeeId);
+    console.log('After removal - items left:', updatedEmployee?.items.map(i => i.nomenclature_id));
+
+    return newState;
+  });
+};
 
   const updateEmployeeItem = (
     employeeId: number,
