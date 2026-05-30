@@ -455,13 +455,12 @@ const EditRequest: React.FC<EditRequestProps> = ({ open, requestId, onClose, onS
           employee_id: emp.employee_id,
           height: emp.height,
           items: emp.items
-            .filter(item => item.selected_quantity > 0)
-            .map(item => ({
-              nomenclature_id: item.nomenclature_id,
-              selected_size: item.is_liquid ? '' : item.selected_size,
-              selected_quantity: item.selected_quantity,
-            })),
-        })),
+  .filter(item => item.selected_quantity > 0)
+  .map(item => ({
+    nomenclature_id: item.nomenclature_id,  // ← это поле должно быть
+    size: item.is_liquid ? '' : item.selected_size,  // ← поле size, не selected_size
+    quantity: item.selected_quantity,  // ← поле quantity, не selected_quantity
+  })),
       };
 
       console.log('Sending update data:', JSON.stringify(requestData, null, 2));
