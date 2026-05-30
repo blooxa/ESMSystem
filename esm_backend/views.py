@@ -366,7 +366,6 @@ def request_post_save(sender, instance, created, **kwargs):
     # else:
     #     send_websocket_notification(instance, 'updated')
 
-
 # ==================== REQUEST VIEWS ====================
 
 class RequestViewSet(viewsets.ModelViewSet):
@@ -3405,7 +3404,7 @@ class NomenclatureViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['title']
 
 class AdminSizeStandardViewSet(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated, IsAdminUserPermission]
+    permission_classes = [IsAuthenticated] # временно для теста
 
     @action(detail=False, methods=['get'])
     def get_all_sizes(self, request):
