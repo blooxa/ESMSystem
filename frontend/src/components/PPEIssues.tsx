@@ -355,7 +355,7 @@ const PPEIssues: React.FC = () => {
 
     setSubmitting(true);
     try {
-      await api.post('/api/ppe-issues/create_issue/', newIssue);
+      await api.post('/ppe-issues/create_issue/', newIssue);
       setSuccess('Выдача успешно зарегистрирована');
       setAddDialogOpen(false);
       setNewIssue({
