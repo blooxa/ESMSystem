@@ -324,44 +324,47 @@ class IsAdminUserPermission(permissions.BasePermission):
 
 # ==================== WEBSOCKET NOTIFICATIONS ====================
 
+# ВРЕМЕННО ОТКЛЮЧЕНО - WebSocket не настроен на Render
 def send_websocket_notification(request_obj, action):
-    """Отправка уведомления через WebSocket"""
-    channel_layer = get_channel_layer()
-
-    request_data = {
-        'id': request_obj.request_id,
-        'title': request_obj.title,
-        'status': request_obj.get_status_display(),
-        'status_code': request_obj.status,
-        'action': action,
-        'requester_name': request_obj.user.employee.full_name if request_obj.user and request_obj.user.employee else request_obj.user.login,
-        'updated_at': request_obj.updated_at.isoformat()
-    }
-
-    async_to_sync(channel_layer.group_send)(
-        'economic_head_group',
-        {
-            'type': 'request_update',
-            'request': request_data
-        }
-    )
-
-    async_to_sync(channel_layer.group_send)(
-        f'user_{request_obj.user.user_id}',
-        {
-            'type': 'request_update',
-            'request': request_data
-        }
-    )
+    """Отправка уведомления через WebSocket (временно отключено)"""
+    pass
+    # channel_layer = get_channel_layer()
+    #
+    # request_data = {
+    #     'id': request_obj.request_id,
+    #     'title': request_obj.title,
+    #     'status': request_obj.get_status_display(),
+    #     'status_code': request_obj.status,
+    #     'action': action,
+    #     'requester_name': request_obj.user.employee.full_name if request_obj.user and request_obj.user.employee else request_obj.user.login,
+    #     'updated_at': request_obj.updated_at.isoformat()
+    # }
+    #
+    # async_to_sync(channel_layer.group_send)(
+    #     'economic_head_group',
+    #     {
+    #         'type': 'request_update',
+    #         'request': request_data
+    #     }
+    # )
+    #
+    # async_to_sync(channel_layer.group_send)(
+    #     f'user_{request_obj.user.user_id}',
+    #     {
+    #         'type': 'request_update',
+    #         'request': request_data
+    #     }
+    # )
 
 
 @receiver(post_save, sender=Request)
 def request_post_save(sender, instance, created, **kwargs):
-    if created:
-        send_websocket_notification(instance, 'created')
-    else:
-        send_websocket_notification(instance, 'updated')
-
+    # Временно отключено
+    pass
+    # if created:
+    #     send_websocket_notification(instance, 'created')
+    # else:
+    #     send_websocket_notification(instance, 'updated')
 
 # ==================== REQUEST VIEWS ====================
 
@@ -3401,7 +3404,7 @@ class NomenclatureViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['title']
 
 class AdminSizeStandardViewSet(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated, IsAdminUserPermission]
+    permission_classes = [IsAuthenticated] # временно для теста
 
     @action(detail=False, methods=['get'])
     def get_all_sizes(self, request):
