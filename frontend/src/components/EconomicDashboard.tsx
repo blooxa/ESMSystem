@@ -423,7 +423,7 @@ const EconomicDashboard: React.FC = () => {
 
     setSubmitting(true);
     try {
-      await api.post(`/api/requests/${selectedRequest.request_id}/mark_ordered/`, {
+      await api.post(`/requests/${selectedRequest.request_id}/mark_ordered/`, {
         supplier_name: supplierName,
         order_price: orderPrice ? parseFloat(orderPrice) : null,
         comment: orderComment,
