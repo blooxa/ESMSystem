@@ -463,7 +463,7 @@ const EconomicDashboard: React.FC = () => {
 
     setSubmitting(true);
     try {
-      await api.post(`/api/requests/${selectedRequest.request_id}/mark_delivered/`, {
+      await api.post(`/requests/${selectedRequest.request_id}/mark_delivered/`, {
         comment: deliveryComment,
         delivered_items: selectedItems.map(item => ({
           employee_id: item.employee_id,
@@ -506,7 +506,7 @@ const EconomicDashboard: React.FC = () => {
 
   setSubmitting(true);
   try {
-    await api.post(`/api/requests/${selectedRequest.request_id}/issue_ppe/`, {
+    await api.post(`/requests/${selectedRequest.request_id}/issue_ppe/`, {
       issue_date: issueDate,
       comment: issueComment,
       issued_items: selectedItems.map(item => ({
@@ -519,7 +519,7 @@ const EconomicDashboard: React.FC = () => {
     });
 
     // Дополнительно обновляем статус заявки на completed
-    await api.post(`/api/requests/${selectedRequest.request_id}/complete/`, {
+    await api.post(`/requests/${selectedRequest.request_id}/complete/`, {
       comment: 'СИЗ выданы'
     });
 
@@ -591,7 +591,7 @@ const EconomicDashboard: React.FC = () => {
     setSubmitting(true);
     try {
       console.log('Approving request:', request.request_id);
-      const response = await api.post(`/api/requests/${request.request_id}/approve_by_economic/`, {
+      const response = await api.post(`/requests/${request.request_id}/approve_by_economic/`, {
         comment: approveComment
       });
       console.log('Approve response:', response.data);
@@ -615,7 +615,7 @@ const EconomicDashboard: React.FC = () => {
   const handleRejectByEconomic = async (request: Request) => {
     setSubmitting(true);
     try {
-      await api.post(`/api/requests/${request.request_id}/reject_by_economic/`, {
+      await api.post(`/requests/${request.request_id}/reject_by_economic/`, {
         comment: rejectComment
       });
       await fetchRequests();
