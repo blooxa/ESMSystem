@@ -5,20 +5,14 @@ import {
   CardContent,
   Typography,
   Button,
-  Paper,
   Alert,
   CircularProgress,
   Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Chip,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  TextField,
 } from '@mui/material';
 import {
   Download as DownloadIcon,
@@ -32,9 +26,7 @@ import {
   AdminPanelSettings as AdminIcon,
   Person as PersonIcon,
   Assignment as AssignmentIcon,
-  TableChart as ExcelIcon,
 } from '@mui/icons-material';
-import { reportsApi } from '../services/api';
 import api from '../services/api';
 import Layout from './Layout';
 
@@ -46,10 +38,7 @@ const Reports: React.FC = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [employees, setEmployees] = useState<any[]>([]);
-  const [positions, setPositions] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
 
-  // Загружаем данные только после определения роли
   useEffect(() => {
     const init = async () => {
       await fetchUserRole();
@@ -57,7 +46,6 @@ const Reports: React.FC = () => {
     init();
   }, []);
 
-  // Загружаем дополнительные данные при изменении роли
   useEffect(() => {
     if (userRole) {
       loadDataByRole();
@@ -65,32 +53,18 @@ const Reports: React.FC = () => {
   }, [userRole]);
 
   const loadDataByRole = async () => {
-    // Для администратора загружаем все данные
-    if (userRole === 'admin') {
-      await Promise.all([
-        fetchEmployees(),
-        fetchPositions(),
-        fetchUsers()
-      ]);
+    // Для всех, кому нужны сотрудники
+    if (userRole === 'admin' || userRole === 'economic_head' || userRole === 'safety_officer') {
+      await fetchEmployees();
     }
-    // Для хоз. отдела и охраны труда загружаем сотрудников и должности
-    else if (userRole === 'economic_head' || userRole === 'safety_officer') {
-      await Promise.all([
-        fetchEmployees(),
-        fetchPositions()
-      ]);
-    }
-    // Для остальных - только если нужно
   };
 
   const fetchUserRole = async () => {
     try {
       const response = await api.get('/users/me/');
-      console.log('User data:', response.data);
       const role = response.data.role;
       const username = response.data.username;
 
-      // Определяем роль (учитываем русские и английские названия)
       if (username === 'admin' || role === 'admin' || role === 'администратор' || response.data.is_superuser) {
         setUserRole('admin');
       } else if (role === 'economic_head' || role === 'начальник хоз. отдела') {
@@ -102,8 +76,6 @@ const Reports: React.FC = () => {
       } else {
         setUserRole('user');
       }
-
-      console.log('Set user role:', userRole);
     } catch (error) {
       console.error('Error fetching user role:', error);
       setUserRole('user');
@@ -112,13 +84,13 @@ const Reports: React.FC = () => {
 
   const fetchEmployees = async () => {
     try {
-      // Пробуем получить через admin эндпоинт, если нет прав - используем другой
+      // Пробуем получить всех сотрудников
       try {
         const response = await api.get('/admin/employees/get_all_employees/');
         setEmployees(response.data);
       } catch (err: any) {
         if (err.response?.status === 403) {
-          // Если нет прав, пробуем получить только сотрудников цеха
+          // Если нет прав, получаем сотрудников цеха
           const response = await api.get('/employees/my_shop_employees/');
           setEmployees(response.data);
         } else {
@@ -128,26 +100,6 @@ const Reports: React.FC = () => {
     } catch (error) {
       console.error('Error fetching employees:', error);
       setEmployees([]);
-    }
-  };
-
-  const fetchPositions = async () => {
-    try {
-      const response = await api.get('/admin/positions/get_all_positions/');
-      setPositions(response.data);
-    } catch (error) {
-      console.error('Error fetching positions:', error);
-      setPositions([]);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const response = await api.get('/admin/users/get_all_users/');
-      setUsers(response.data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      setUsers([]);
     }
   };
 
@@ -187,7 +139,6 @@ const Reports: React.FC = () => {
     }
   };
 
-  // Функции для разных типов отчетов
   const reportsByRole = {
     admin: [
       {
@@ -257,8 +208,8 @@ const Reports: React.FC = () => {
         reports: [
           { title: 'Все заявки', endpoint: '/reports/all_requests/', filename: 'all_requests' },
           { title: 'Заявки по статусам', endpoint: `/reports/requests_by_status/${selectedStatus}/`, filename: `requests_by_status_${selectedStatus}` },
-          { title: 'Заявки по пользователям', endpoint: '/reports/requests_by_users/', filename: 'requests_by_users' },
           { title: 'На рассмотрении (Охрана труда)', endpoint: '/reports/pending_safety_requests/', filename: 'pending_safety_requests' },
+          { title: 'На рассмотрении (Хоз. отдел)', endpoint: '/reports/pending_economic_requests/', filename: 'pending_economic_requests' },
         ],
       },
       {
@@ -406,23 +357,21 @@ const Reports: React.FC = () => {
                   </Select>
                 </FormControl>
 
-                {(userRole === 'admin' || userRole === 'economic_head' || userRole === 'safety_officer') && (
-                  <FormControl sx={{ minWidth: 250 }}>
-                    <InputLabel>Сотрудник</InputLabel>
-                    <Select
-                      value={selectedEmployee}
-                      onChange={(e) => setSelectedEmployee(e.target.value)}
-                      label="Сотрудник"
-                    >
-                      <MenuItem value="">-- Выберите сотрудника --</MenuItem>
-                      {employees.map(emp => (
-                        <MenuItem key={emp.employee_id} value={emp.employee_id}>
-                          {emp.full_name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
+                <FormControl sx={{ minWidth: 250 }}>
+                  <InputLabel>Сотрудник (для выдачи СИЗ)</InputLabel>
+                  <Select
+                    value={selectedEmployee}
+                    onChange={(e) => setSelectedEmployee(e.target.value)}
+                    label="Сотрудник (для выдачи СИЗ)"
+                  >
+                    <MenuItem value="">-- Выберите сотрудника --</MenuItem>
+                    {employees.map(emp => (
+                      <MenuItem key={emp.employee_id} value={emp.employee_id}>
+                        {emp.full_name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Box>
             </CardContent>
           </Card>
