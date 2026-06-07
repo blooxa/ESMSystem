@@ -49,46 +49,85 @@ const Reports: React.FC = () => {
   const [positions, setPositions] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
 
+  // Загружаем данные только после определения роли
   useEffect(() => {
-    fetchUserRole();
-    fetchEmployees();
-    fetchPositions();
-    fetchUsers();
+    const init = async () => {
+      await fetchUserRole();
+    };
+    init();
   }, []);
 
-  const fetchUserRole = async () => {
-  try {
-    const response = await api.get('/users/me/');
-    console.log('User data:', response.data);
-    const role = response.data.role;
-    const username = response.data.username;
+  // Загружаем дополнительные данные при изменении роли
+  useEffect(() => {
+    if (userRole) {
+      loadDataByRole();
+    }
+  }, [userRole]);
 
-    // Определяем роль (учитываем русские и английские названия)
-    if (username === 'admin' || role === 'admin' || role === 'администратор' || response.data.is_superuser) {
-      setUserRole('admin');
-    } else if (role === 'economic_head' || role === 'начальник хоз. отдела') {
-      setUserRole('economic_head');
-    } else if (role === 'safety_officer' || role === 'охрана труда') {
-      setUserRole('safety_officer');
-    } else if (role === 'department_head' || role === 'начальник цеха') {
-      setUserRole('department_head');
-    } else {
+  const loadDataByRole = async () => {
+    // Для администратора загружаем все данные
+    if (userRole === 'admin') {
+      await Promise.all([
+        fetchEmployees(),
+        fetchPositions(),
+        fetchUsers()
+      ]);
+    }
+    // Для хоз. отдела и охраны труда загружаем сотрудников и должности
+    else if (userRole === 'economic_head' || userRole === 'safety_officer') {
+      await Promise.all([
+        fetchEmployees(),
+        fetchPositions()
+      ]);
+    }
+    // Для остальных - только если нужно
+  };
+
+  const fetchUserRole = async () => {
+    try {
+      const response = await api.get('/users/me/');
+      console.log('User data:', response.data);
+      const role = response.data.role;
+      const username = response.data.username;
+
+      // Определяем роль (учитываем русские и английские названия)
+      if (username === 'admin' || role === 'admin' || role === 'администратор' || response.data.is_superuser) {
+        setUserRole('admin');
+      } else if (role === 'economic_head' || role === 'начальник хоз. отдела') {
+        setUserRole('economic_head');
+      } else if (role === 'safety_officer' || role === 'охрана труда') {
+        setUserRole('safety_officer');
+      } else if (role === 'department_head' || role === 'начальник цеха') {
+        setUserRole('department_head');
+      } else {
+        setUserRole('user');
+      }
+
+      console.log('Set user role:', userRole);
+    } catch (error) {
+      console.error('Error fetching user role:', error);
       setUserRole('user');
     }
-
-    console.log('Set user role:', userRole);
-  } catch (error) {
-    console.error('Error fetching user role:', error);
-    setUserRole('user');
-  }
-};
+  };
 
   const fetchEmployees = async () => {
     try {
-      const response = await api.get('/admin/employees/get_all_employees/');
-      setEmployees(response.data);
+      // Пробуем получить через admin эндпоинт, если нет прав - используем другой
+      try {
+        const response = await api.get('/admin/employees/get_all_employees/');
+        setEmployees(response.data);
+      } catch (err: any) {
+        if (err.response?.status === 403) {
+          // Если нет прав, пробуем получить только сотрудников цеха
+          const response = await api.get('/employees/my_shop_employees/');
+          setEmployees(response.data);
+        } else {
+          throw err;
+        }
+      }
     } catch (error) {
       console.error('Error fetching employees:', error);
+      setEmployees([]);
     }
   };
 
@@ -98,6 +137,7 @@ const Reports: React.FC = () => {
       setPositions(response.data);
     } catch (error) {
       console.error('Error fetching positions:', error);
+      setPositions([]);
     }
   };
 
@@ -107,56 +147,59 @@ const Reports: React.FC = () => {
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
+      setUsers([]);
     }
   };
 
-  const downloadReport = async (endpoint: string, filename: string, needsEmployee?: boolean) => {
-  if (needsEmployee && !selectedEmployee) {
-    setError('Сначала выберите сотрудника в фильтрах');
-    return;
-  }
+  const downloadReport = async (endpoint: string, filename: string) => {
+    // Проверяем, нужен ли сотрудник для отчета
+    if ((endpoint.includes('employee_ppe_standards') || endpoint.includes('employee_ppe_issues')) && !selectedEmployee) {
+      setError('Сначала выберите сотрудника в фильтрах');
+      return;
+    }
 
-  if (!endpoint) {
-    setError('Не выбран сотрудник для отчета');
-    return;
-  }
+    setLoading(true);
+    setError('');
+    setSuccess('');
 
-  setLoading(true);
-  setError('');
-  setSuccess('');
-
-  try {
-    const response = await api.get(endpoint, { responseType: 'blob' });
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-    setSuccess(`Отчет "${filename}" успешно сформирован`);
-  } catch (err) {
-    console.error('Error downloading report:', err);
-    setError('Ошибка при формировании отчета');
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      const response = await api.get(endpoint, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      setSuccess(`Отчет "${filename}" успешно сформирован`);
+    } catch (err: any) {
+      console.error('Error downloading report:', err);
+      if (err.response?.status === 403) {
+        setError('У вас нет прав на этот отчет');
+      } else if (err.response?.status === 404) {
+        setError('Отчет не найден. Проверьте правильность параметров.');
+      } else {
+        setError('Ошибка при формировании отчета');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Функции для разных типов отчетов
   const reportsByRole = {
     admin: [
       {
-  category: 'Заявки',
-  reports: [
-    { title: 'Все заявки', endpoint: '/reports/all_requests/', filename: 'all_requests' },
-    { title: 'Заявки по статусам', endpoint: `/reports/requests_by_status/${selectedStatus}/`, filename: `requests_by_status_${selectedStatus}` },
-    { title: 'Заявки по пользователям', endpoint: '/reports/requests_by_users/', filename: 'requests_by_users' },
-    { title: 'На рассмотрении (Охрана труда)', endpoint: '/reports/pending_safety_requests/', filename: 'pending_safety_requests' },
-    { title: 'На рассмотрении (Хоз. отдел)', endpoint: '/reports/pending_economic_requests/', filename: 'pending_economic_requests' },
-  ],
-},
+        category: 'Заявки',
+        reports: [
+          { title: 'Все заявки', endpoint: '/reports/all_requests/', filename: 'all_requests' },
+          { title: 'Заявки по статусам', endpoint: `/reports/requests_by_status/${selectedStatus}/`, filename: `requests_by_status_${selectedStatus}` },
+          { title: 'Заявки по пользователям', endpoint: '/reports/requests_by_users/', filename: 'requests_by_users' },
+          { title: 'На рассмотрении (Охрана труда)', endpoint: '/reports/pending_safety_requests/', filename: 'pending_safety_requests' },
+          { title: 'На рассмотрении (Хоз. отдел)', endpoint: '/reports/pending_economic_requests/', filename: 'pending_economic_requests' },
+        ],
+      },
       {
         category: 'Сотрудники',
         reports: [
@@ -196,7 +239,7 @@ const Reports: React.FC = () => {
       {
         category: 'Сотрудники',
         reports: [
-          { title: 'Сотрудники с размерами', endpoint: '/reports/my_shop_employees_with_sizes/', filename: 'my_shop_employees_with_sizes' },
+          { title: 'Сотрудники цеха с размерами', endpoint: '/reports/my_shop_employees_with_sizes/', filename: 'my_shop_employees_with_sizes' },
         ],
       },
       {
@@ -238,7 +281,6 @@ const Reports: React.FC = () => {
         category: 'Сотрудники',
         reports: [
           { title: 'Сотрудники цеха с размерами', endpoint: '/reports/my_shop_employees_with_sizes/', filename: 'my_shop_employees_with_sizes' },
-          { title: 'Нормы выдачи СИЗ для сотрудников', endpoint: '/reports/my_shop_employee_standards/', filename: 'my_shop_employee_standards' },
         ],
       },
     ],
@@ -272,19 +314,19 @@ const Reports: React.FC = () => {
   ];
 
   const getRoleLabel = () => {
-  switch (userRole) {
-    case 'admin':
-      return { label: 'Администратор', icon: <AdminIcon />, color: '#f44336' };
-    case 'economic_head':
-      return { label: 'Начальник хоз. отдела', icon: <OrderIcon />, color: '#9c27b0' };
-    case 'safety_officer':
-      return { label: 'Охрана труда', icon: <SafetyIcon />, color: '#2196f3' };
-    case 'department_head':
-      return { label: 'Начальник цеха', icon: <PeopleIcon />, color: '#ff9800' };
-    default:
-      return { label: 'Пользователь', icon: <PersonIcon />, color: '#4caf50' };
-  }
-};
+    switch (userRole) {
+      case 'admin':
+        return { label: 'Администратор', icon: <AdminIcon />, color: '#f44336' };
+      case 'economic_head':
+        return { label: 'Начальник хоз. отдела', icon: <OrderIcon />, color: '#9c27b0' };
+      case 'safety_officer':
+        return { label: 'Охрана труда', icon: <SafetyIcon />, color: '#2196f3' };
+      case 'department_head':
+        return { label: 'Начальник цеха', icon: <PeopleIcon />, color: '#ff9800' };
+      default:
+        return { label: 'Пользователь', icon: <PersonIcon />, color: '#4caf50' };
+    }
+  };
 
   const roleInfo = getRoleLabel();
 
@@ -343,6 +385,48 @@ const Reports: React.FC = () => {
           </Alert>
         )}
 
+        {/* Фильтры для отчетов */}
+        {(userRole === 'admin' || userRole === 'economic_head' || userRole === 'safety_officer') && (
+          <Card sx={{ borderRadius: 3, mb: 3 }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                Фильтры для отчетов
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <FormControl sx={{ minWidth: 200 }}>
+                  <InputLabel>Статус заявки</InputLabel>
+                  <Select
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    label="Статус заявки"
+                  >
+                    {statusOptions.map(opt => (
+                      <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {(userRole === 'admin' || userRole === 'economic_head' || userRole === 'safety_officer') && (
+                  <FormControl sx={{ minWidth: 250 }}>
+                    <InputLabel>Сотрудник</InputLabel>
+                    <Select
+                      value={selectedEmployee}
+                      onChange={(e) => setSelectedEmployee(e.target.value)}
+                      label="Сотрудник"
+                    >
+                      <MenuItem value="">-- Выберите сотрудника --</MenuItem>
+                      {employees.map(emp => (
+                        <MenuItem key={emp.employee_id} value={emp.employee_id}>
+                          {emp.full_name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </Box>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Список доступных отчетов */}
         {getReportsForRole().map((category, idx) => (
