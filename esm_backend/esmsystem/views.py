@@ -2036,7 +2036,9 @@ class ReportsViewSet(viewsets.ViewSet):
     def all_requests(self, request):
         """Отчет по всем заявкам"""
         role = self._get_user_role(request)
-        if role not in ['admin', 'администратор', 'economic_head', 'начальник хоз. отдела']:
+        # Разрешаем для admin, economic_head и safety_officer
+        if role not in ['admin', 'администратор', 'economic_head', 'начальник хоз. отдела', 'safety_officer',
+                        'охрана труда']:
             return Response({'error': 'Доступ запрещен'}, status=403)
 
         requests = Request.objects.all().order_by('-created_at')
@@ -2095,7 +2097,8 @@ class ReportsViewSet(viewsets.ViewSet):
     def requests_by_users(self, request):
         """Отчет по заявкам с группировкой по пользователям"""
         role = self._get_user_role(request)
-        if role not in ['admin', 'администратор', 'economic_head', 'начальник хоз. отдела']:
+        # Только для admin
+        if role not in ['admin', 'администратор']:
             return Response({'error': 'Доступ запрещен'}, status=403)
 
         users = AppUser.objects.all().select_related('employee')
