@@ -2036,9 +2036,10 @@ class ReportsViewSet(viewsets.ViewSet):
     def all_requests(self, request):
         """Отчет по всем заявкам"""
         role = self._get_user_role(request)
-        # Разрешаем для admin, economic_head и safety_officer
-        if role not in ['admin', 'администратор', 'economic_head', 'начальник хоз. отдела', 'safety_officer',
-                        'охрана труда']:
+        # Разрешаем для admin, economic_head, safety_officer
+        allowed_roles = ['admin', 'администратор', 'economic_head', 'начальник хоз. отдела', 'safety_officer',
+                         'охрана труда']
+        if role not in allowed_roles:
             return Response({'error': 'Доступ запрещен'}, status=403)
 
         requests = Request.objects.all().order_by('-created_at')
@@ -2146,7 +2147,10 @@ class ReportsViewSet(viewsets.ViewSet):
     def pending_economic_requests(self, request):
         """Заявки на рассмотрении в хоз. отделе"""
         role = self._get_user_role(request)
-        if role not in ['admin', 'администратор', 'economic_head', 'начальник хоз. отдела']:
+        # Разрешаем для admin, economic_head, safety_officer
+        allowed_roles = ['admin', 'администратор', 'economic_head', 'начальник хоз. отдела', 'safety_officer',
+                         'охрана труда']
+        if role not in allowed_roles:
             return Response({'error': 'Доступ запрещен'}, status=403)
 
         requests = Request.objects.filter(status='hr_approved').order_by('-created_at')
@@ -2165,7 +2169,6 @@ class ReportsViewSet(viewsets.ViewSet):
             ])
 
         return self._create_excel_response(data, headers, 'pending_economic_requests')
-
     @action(detail=False, methods=['get'])
     def my_requests(self, request):
         """Отчет по моим заявкам"""
